@@ -1,0 +1,509 @@
+/* =====================================================
+   ESTILO DA TELA DE LOGIN (azul e branco) - versão 3
+   Cartão dividido em duas metades (painel azul + formulário)
+   com bolhas se movendo atrás dele.
+   Substitua o seu style.css INTEIRO por este arquivo.
+
+   Ordem do arquivo:
+   1. Cores e ícones        5. Campos (.login, .senha, .entar)
+   2. Base e fundo animado  6. Botão (.butao)
+   3. Cartão em 2 colunas   7. Estados do JavaScript
+   4. Painel azul (.h1)     8. Celular e acessibilidade
+   ===================================================== */
+
+
+/* ---------- 1. CORES E ÍCONES ---------- */
+:root {
+    --azul-escuro: #0a2a6b;
+    --azul: #1e6fff;
+    --azul-medio: #4a93ff;
+    --azul-claro: #dce9ff;
+    --azul-fundo: #f4f8ff;
+    --branco: #ffffff;
+    --texto: #0a1f44;
+    --texto-suave: #5d7199;
+    --erro: #d92d4b;
+    --sucesso: #1a7f4b;
+
+    /* Recuo lateral do formulário (usado em vários lugares).
+       Mudando aqui, muda em todos. */
+    --recuo: 2.6rem;
+
+    /* Ícones em SVG guardados como texto: versão cinza e versão azul */
+    --icone-usuario: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235d7199' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4 4-6 8-6s8 2 8 6'/%3E%3C/svg%3E");
+    --icone-usuario-azul: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231e6fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4 4-6 8-6s8 2 8 6'/%3E%3C/svg%3E");
+    --icone-cadeado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235d7199' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+    --icone-cadeado-azul: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231e6fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+}
+
+
+/* ---------- 2. BASE E FUNDO ANIMADO ---------- */
+
+/* Zera as margens padrão. box-sizing: border-box faz padding e borda
+   ficarem DENTRO da largura do elemento. */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+::selection {
+    background: var(--azul);
+    color: var(--branco);
+}
+
+body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;                /* centraliza o cartão na tela */
+    padding: 1.5rem;
+    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+    color: var(--texto);
+    background: linear-gradient(160deg, var(--branco), var(--azul-claro));
+    overflow-x: hidden;
+}
+
+/* --- BOLHAS SUBINDO ATRÁS DO CARTÃO ---
+   Como funciona (para entender e mexer):
+   1. Cada camada (::before e ::after) é um elemento com o DOBRO da altura da tela.
+   2. Os círculos são desenhados com radial-gradient e o desenho se REPETE na
+      vertical (cada repetição tem a altura da tela: background-size 100% 50%).
+   3. A animação sobe a camada em 50% da sua altura (= uma tela inteira).
+      Como o desenho se repete, o final é igual ao começo: o loop nunca "pula".
+   4. A camada de trás é lenta e com círculos grandes; a da frente é mais
+      rápida e com círculos pequenos. Isso dá sensação de profundidade. */
+
+/* Camada de trás: círculos grandes e devagar */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200%;
+    background-image:
+        radial-gradient(circle at 8% 30%,  rgba(30, 111, 255, .10) 0 5rem,   transparent calc(5rem + 1px)),
+        radial-gradient(circle at 88% 22%, rgba(74, 147, 255, .12) 0 3.5rem, transparent calc(3.5rem + 1px)),
+        radial-gradient(circle at 72% 78%, rgba(30, 111, 255, .09) 0 6.5rem, transparent calc(6.5rem + 1px)),
+        radial-gradient(circle at 22% 86%, rgba(74, 147, 255, .12) 0 2.5rem, transparent calc(2.5rem + 1px));
+    background-size: 100% 50%;
+    background-repeat: repeat-y;
+    animation: subir-bolhas 45s linear infinite;
+}
+
+/* Camada da frente: bolinhas e anéis, mais rápida */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200%;
+    background-image:
+        radial-gradient(circle at 18% 55%, rgba(30, 111, 255, .22) 0 .9rem, transparent calc(.9rem + 1px)),
+        radial-gradient(circle at 42% 18%, rgba(74, 147, 255, .25) 0 .6rem, transparent calc(.6rem + 1px)),
+        radial-gradient(circle at 60% 88%, rgba(30, 111, 255, .20) 0 1.1rem, transparent calc(1.1rem + 1px)),
+        radial-gradient(circle at 93% 60%, rgba(30, 111, 255, .22) 0 .7rem, transparent calc(.7rem + 1px)),
+        /* anéis: transparente por dentro e uma linha fina de 2px na borda */
+        radial-gradient(circle at 30% 30%, transparent 0 2rem,   rgba(30, 111, 255, .28) 2rem calc(2rem + 2px),   transparent calc(2rem + 3px)),
+        radial-gradient(circle at 78% 45%, transparent 0 1.4rem, rgba(74, 147, 255, .32) 1.4rem calc(1.4rem + 2px), transparent calc(1.4rem + 3px));
+    background-size: 100% 50%;
+    background-repeat: repeat-y;
+    animation: subir-bolhas 24s linear infinite;
+}
+
+@keyframes subir-bolhas {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }   /* 50% da camada = uma tela inteira */
+}
+
+/* Os <br> do seu HTML só serviam para dar espaço; o "gap" do cartão faz isso agora */
+br {
+    display: none;
+}
+
+
+/* ---------- 3. CARTÃO EM DUAS COLUNAS (.body) ----------
+   CSS Grid: o painel azul (.h1) fica na coluna 1 e os campos na coluna 2. */
+.body {
+    position: relative;
+    z-index: 1;                         /* NA FRENTE das bolhas */
+    width: min(100%, 52rem);
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;  /* painel azul um pouco menor que o formulário */
+    row-gap: 1.4rem;                    /* espaço entre Login, Senha, Entrar como, botão */
+    background: var(--branco);
+    border-radius: 1.4rem;
+    overflow: hidden;                   /* corta o que passar dos cantos arredondados */
+    box-shadow: 0 25px 60px rgba(10, 42, 107, .25);
+    transition: box-shadow .3s;
+    animation: entrar .7s ease-out;
+}
+
+.body:hover {
+    box-shadow: 0 35px 80px rgba(10, 42, 107, .35);
+}
+
+@keyframes entrar {
+    from { opacity: 0; transform: translateY(1.5rem); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Blocos do formulário: sempre na coluna 2, com recuo lateral,
+   e entrando um depois do outro ("both" mantém invisível durante o atraso) */
+.login,
+.senha,
+.entar,
+.butao {
+    grid-column: 2;
+    padding: 0 var(--recuo);
+    animation: subir .5s ease-out both;
+}
+.login { animation-delay: .30s; padding-top: var(--recuo); }   /* 1º bloco: espaço no topo */
+.senha { animation-delay: .40s; }
+.entar { animation-delay: .50s; }
+.butao { animation-delay: .60s; padding-bottom: var(--recuo); text-align: center; }
+
+@keyframes subir {
+    from { opacity: 0; transform: translateY(.9rem); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Título da metade direita.
+   (Está feito com CSS para você não precisar mexer no HTML. Se preferir,
+   apague esta regra e coloque um <h2>Acesse sua conta</h2> no HTML.) */
+.login::before {
+    content: "Acesse sua conta";
+    display: block;
+    margin-bottom: 1.6rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--azul);
+}
+
+form {
+    width: 100%;
+}
+
+
+/* ---------- 4. PAINEL AZUL (.h1) ---------- */
+.h1 {
+    grid-column: 1;
+    grid-row: 1 / span 4;               /* ocupa a altura dos 4 blocos da direita */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;            /* texto no meio da altura */
+    padding: 2.6rem 2.2rem;
+    color: var(--branco);
+
+    /* Degradê grande que desliza devagar (efeito de cor "respirando") */
+    background: linear-gradient(160deg, var(--azul), var(--azul-escuro), var(--azul));
+    background-size: 200% 200%;
+    animation: deslizar 12s ease-in-out infinite alternate;
+}
+
+@keyframes deslizar {
+    from { background-position: 0% 0%; }
+    to   { background-position: 100% 100%; }
+}
+
+.h1 h1 {
+    position: relative;
+    z-index: 1;                         /* texto na frente dos círculos */
+    margin-bottom: .8rem;
+    font-size: 1.9rem;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+}
+
+.h1 p {
+    position: relative;
+    z-index: 1;
+    line-height: 1.5;
+    opacity: .9;
+}
+
+/* Um círculo cheio (canto de cima) e um anel (canto de baixo), flutuando */
+.h1::before,
+.h1::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    animation: flutuar 8s ease-in-out infinite;
+}
+
+.h1::before {
+    width: 11rem;
+    height: 11rem;
+    top: -4rem;
+    right: -4rem;
+    background: rgba(255, 255, 255, .13);
+}
+
+.h1::after {
+    width: 7rem;
+    height: 7rem;
+    bottom: -2rem;
+    left: -1.5rem;
+    border: 3px solid rgba(255, 255, 255, .25);
+    animation-delay: -4s;
+}
+
+@keyframes flutuar {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.5rem); }
+}
+
+
+/* ---------- 5. CAMPOS (.login, .senha, .entar) ---------- */
+
+label {
+    display: block;
+    margin-bottom: .45rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    transition: color .2s;
+}
+
+/* :focus-within = "quando algum item DENTRO deste bloco está selecionado" */
+.login:focus-within label,
+.senha:focus-within label,
+.entar:focus-within label {
+    color: var(--azul);
+}
+
+/* Use background-color (e não "background") para não apagar os ícones */
+input,
+select {
+    width: 100%;
+    padding: .9rem 1rem;
+    font: inherit;
+    color: var(--texto);
+    background-color: var(--azul-fundo);
+    border: 2px solid var(--azul-claro);
+    border-radius: .8rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background-color .2s, transform .2s;
+}
+
+input:hover,
+select:hover {
+    border-color: #b4cfff;
+}
+
+input:focus,
+select:focus {
+    background-color: var(--branco);
+    border-color: var(--azul);
+    box-shadow: 0 0 0 4px rgba(30, 111, 255, .18), 0 8px 18px rgba(30, 111, 255, .12);
+    transform: translateY(-1px);
+}
+
+/* Ícones dentro dos campos (ficam azuis quando o campo é selecionado) */
+#login,
+#senha {
+    padding-left: 2.9rem;               /* abre espaço para o ícone */
+    background-repeat: no-repeat;
+    background-position: 1rem center;
+    background-size: 1.15rem;
+}
+#login       { background-image: var(--icone-usuario); }
+#login:focus { background-image: var(--icone-usuario-azul); }
+#senha       { background-image: var(--icone-cadeado); }
+#senha:focus { background-image: var(--icone-cadeado-azul); }
+
+/* Evita o amarelo do preenchimento automático do navegador */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 40px var(--branco) inset;
+    -webkit-text-fill-color: var(--texto);
+}
+
+/* Lista "Entrar como" com seta azul própria */
+select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 2.6rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%231e6fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+
+/* ---------- 6. BOTÃO ENTRAR (.butao) ----------
+   Em formato de pílula e centralizado, como no modelo. */
+.butao button {
+    position: relative;
+    overflow: hidden;
+    min-width: 12rem;
+    padding: 1rem 3rem;
+    font: inherit;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--branco);
+    border: none;
+    border-radius: 3rem;                /* bem arredondado = pílula */
+    cursor: pointer;
+    background: linear-gradient(90deg, var(--azul), var(--azul-escuro), var(--azul));
+    background-size: 200% 100%;
+    background-position: 0 0;
+    transition: transform .15s, box-shadow .2s, background-position .5s;
+}
+
+/* Faixa de brilho diagonal, escondida à esquerda */
+.butao button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    transition: left .6s;
+}
+
+.butao button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(30, 111, 255, .4);
+    background-position: 100% 0;
+}
+.butao button:hover::after {
+    left: 130%;
+}
+
+.butao button:active {
+    transform: translateY(0) scale(.98);
+    box-shadow: 0 4px 10px rgba(30, 111, 255, .3);
+}
+
+.butao button:focus-visible {
+    outline: 3px solid var(--azul-escuro);
+    outline-offset: 3px;
+}
+
+
+/* ---------- 7. ESTADOS DO JAVASCRIPT ---------- */
+
+.senha {
+    position: relative;
+}
+/* Botão Mostrar/Ocultar (criado pelo JS), na linha do rótulo "Senha" */
+.ver-senha {
+    position: absolute;
+    top: 0;
+    right: var(--recuo);
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--azul);
+    cursor: pointer;
+    transition: color .2s;
+}
+.ver-senha:hover {
+    color: var(--azul-escuro);
+    text-decoration: underline;
+}
+
+/* Campo com erro */
+.invalido input {
+    border-color: var(--erro);
+    animation: tremer .35s;
+}
+.invalido input:focus {
+    border-color: var(--erro);
+    box-shadow: 0 0 0 4px rgba(217, 45, 75, .18);
+}
+.login.invalido label,
+.senha.invalido label {
+    color: var(--erro);
+}
+
+.erro {
+    display: block;
+    margin-top: .4rem;
+    font-size: .8rem;
+    color: var(--erro);
+    animation: subir .25s ease-out;
+}
+
+@keyframes tremer {
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+}
+
+/* O cartão inteiro treme quando o login falha */
+.body.tremer {
+    animation: tremer .4s;
+}
+
+/* Mensagem de sucesso ou erro embaixo do botão */
+.mensagem {
+    min-height: 1.3rem;
+    margin-top: 1rem;
+    font-size: .9rem;
+    text-align: center;
+}
+.mensagem.ok    { color: var(--sucesso); }
+.mensagem.falha { color: var(--erro); }
+
+.butao button:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* ---------- 8. CELULAR E ACESSIBILIDADE ---------- */
+
+/* Telas até 760px: o painel azul vai para CIMA e o formulário para baixo */
+@media (max-width: 760px) {
+    .body {
+        width: min(100%, 26rem);
+        grid-template-columns: 1fr;     /* uma coluna só */
+    }
+    .h1 {
+        grid-column: 1;
+        grid-row: auto;
+        padding: 2rem 1.6rem;
+    }
+    .h1 h1 {
+        font-size: 1.5rem;
+    }
+    .login,
+    .senha,
+    .entar,
+    .butao {
+        grid-column: 1;
+    }
+    .login {
+        padding-top: 0;
+    }
+    .body {
+        row-gap: 1.4rem;
+    }
+    .h1 {
+        margin-bottom: .2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --recuo: 1.4rem;
+    }
+}
+
+/* Quem configurou o sistema para "reduzir movimento" não vê as animações */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
